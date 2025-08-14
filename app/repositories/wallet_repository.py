@@ -1,7 +1,8 @@
+from app.services.wallet_service import IWalletRepo
 from ..models import Wallet as WalletModel
 from .base import BaseRespository
 
-class WalletRepository(BaseRespository):
+class WalletRepository(BaseRespository, IWalletRepo):
     def get_wallet_with_lock(self, wallet_id: int):
         return self.connection.query(WalletModel).filter(WalletModel.id == wallet_id).with_for_update().first()
     

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Body, Depends, Path
-from ..services.wallet_service import WalletService
+from app.repositories import transaction_repository
+from app.services.wallet_service import WalletService
 
-from .dependencies import get_repository
-from ..repositories.transaction_repository import TransactionRepository
-from ..repositories.wallet_repository import WalletRepository
+from app.api.dependencies import get_db, get_repository
+from app.repositories.transaction_repository import TransactionRepository
+from app.repositories.wallet_repository import WalletRepository
 
 router = APIRouter(prefix="/api/v1/wallets")
 
@@ -41,10 +42,8 @@ def make_operation(
 def get_balance(
     uuid: int = Path(),
     wallet_repo: WalletRepository = Depends(get_repository(WalletRepository)),
-    transaction_repo: TransactionRepository = Depends(
-        get_repository(TransactionRepository)
-    ),
 ):
+    transaction_repo = TransactionRepository(get_db())
     wallet_service = WalletService(transaction_repo, wallet_repo)
     try:
         return wallet_service.get_balance(uuid)

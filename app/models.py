@@ -10,6 +10,7 @@ from datetime import datetime
 from sqlalchemy import DateTime
 from sqlalchemy import Float
 from sqlalchemy import func
+
 class Base(DeclarativeBase):
     pass
 

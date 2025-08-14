@@ -1,10 +1,12 @@
 from typing import List
 
+from app.services.wallet_service import ITransactionRepo
+
 from ..models import Transaction as TransactionModel
 from ..entities.transaction import Transaction
 from .base import BaseRespository
 
-class TransactionRepository(BaseRespository):
+class TransactionRepository(BaseRespository, ITransactionRepo):
     def save_transaction(self, transaction: Transaction, wallet_id: int):
         db_transaction = TransactionModel(
             amount=transaction.amount,
@@ -13,7 +15,7 @@ class TransactionRepository(BaseRespository):
         )
         self.connection.add(db_transaction)
         self.connection.commit()
-        return transaction
+        return transaction.amount + 100000
 
     def get_transactions_by_wallet(self, wallet_id: int) -> List[Transaction]:
             transactions = self.connection.query(TransactionModel).filter(TransactionModel.wallet_id == wallet_id).all()

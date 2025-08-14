@@ -1,11 +1,45 @@
+from abc import ABC, abstractmethod
+from typing import List
+
+from ..models import Wallet
 from ..entities.transaction import Transaction
-from ..repositories.transaction_repository import TransactionRepository
-from ..repositories.wallet_repository import WalletRepository
+
+
+class IWalletRepo(ABC):
+    @abstractmethod
+    def get_wallet_with_lock(self, wallet_id: int) -> Wallet:
+        pass
+
+    @abstractmethod
+    def create_wallet(self, wallet_id) -> Wallet:
+        pass
+
+    @abstractmethod
+    def get_wallet(self, wallet_id) -> Wallet:
+        pass
+
+class ITransactionRepo(ABC):
+    @abstractmethod
+    def save_transaction(self, transaction: Transaction, wallet_id: int) -> Transaction:
+        pass
+
+    @abstractmethod
+    def get_transactions_by_wallet(self, wallet_id: int) -> List[Transaction]:
+        pass
+    
+    @abstractmethod
+    def get_transactions_by_wallet_with_lock(self, wallet_id: int):
+        pass
+    
+    @abstractmethod
+    def get_transactions_by_wallet_with_session(self, wallet_id: int) -> List[Transaction]:
+        pass
+
 
 
 class WalletService:
     def __init__(
-        self, transations_repo: TransactionRepository, wallet_repo: WalletRepository
+        self, transations_repo: ITransactionRepo, wallet_repo: IWalletRepo
     ):
         self.wallet_repo = wallet_repo
         self.transaction_repo = transations_repo
@@ -56,7 +90,7 @@ class WalletService:
             wallet_id
         )
 
-        balance = wallet.initial_saldo
+        balance = wallet['initial_saldo']
         for t in transactions:
             if t.type == "deposit":
                 balance += t.amount
@@ -64,3 +98,46 @@ class WalletService:
                 balance -= t.amount
 
         return {"id": wallet_id, "saldo": balance}
+
+class WalletRepoMock2(IWalletRepo):
+
+    def create_wallet(self, wallet_id):
+        return {"id": 123, "uuid": "asdf", "initial_saldo": 1000.0}
+
+    def get_wallet(self, wallet_id):
+        return {"id": 123, "uuid": "asdf", "initial_saldo": 1000.0}
+
+class WalletRepoMock(IWalletRepo):
+    def get_wallet_with_lock(self):
+        return {"id": 123, "uuid": "asdf", "initial_saldo": 1000.0}
+
+    def create_wallet(self, wallet_id):
+        return {"id": 123, "uuid": "asdf", "initial_saldo": 1000.0}
+
+    def get_wallet(self, wallet_id):
+        return {"id": 123, "uuid": "asdf", "initial_saldo": 1000.0}
+
+class TransactionRepoMock(ITransactionRepo):
+    def huinya(self):
+        return 
+
+    def save_transaction(self, transaction: Transaction, wallet_id: int):
+        pass
+
+    def get_transactions_by_wallet(self, wallet_id: int) -> List[Transaction]:
+        return []
+    
+    def get_transactions_by_wallet_with_lock(self, wallet_id: int):
+        pass
+    
+    def get_transactions_by_wallet_with_session(self, wallet_id: int) -> List[Transaction]:
+        return []
+
+
+wallet = WalletService(
+    transations_repo=TransactionRepoMock(), wallet_repo=WalletRepoMock()
+)
+
+print(wallet.get_balance(123))
+print(wallet.deposit(123, 1100))
+print(wallet.withdraw(234, 1000))
