@@ -32,7 +32,7 @@ services:
     volumes:
       - .:/app
     command: >
-      sh -c "python -m app.main"
+      sh -c "uvicorn app.main:app --host localhost --port 8000 --reload"
 
 volumes:
   postgres_data:
